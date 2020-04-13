@@ -1,0 +1,20 @@
+#!/bin/bash
+
+_show_complete()
+{
+    local cur prev opts node_names
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts=`media_converter --help | grep '  --' | awk '{print $1}'`
+    templates=`media_converter -t get_converters`
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    COMPREPLY=( $(compgen -W "${templates}" -- ${cur}) )
+}
+
+complete -F _show_complete media_converter
