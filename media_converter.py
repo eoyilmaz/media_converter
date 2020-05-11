@@ -339,6 +339,7 @@ class MediaConverter(object):
         self.source_path = source_path
         self.target_path = target_path
         self.output_file_extension = output_file_extension
+        self._extra_options = None
         self.extra_options = extra_options
         self.auto_rename = auto_rename
 
@@ -346,6 +347,87 @@ class MediaConverter(object):
             file_types = []
 
         self.file_types = file_types
+
+    @property
+    def extra_options(self):
+        """Add extra options.
+
+        Setting any pre existing flags here will remove the original flag from
+        the original command
+        """
+        return self._extra_options
+
+    @extra_options.setter
+    def extra_options(self, extra_options):
+        """setter for the extra_options attribute
+
+        :param str extra_options:
+        :return:
+        """
+        if extra_options is not None:
+
+            # clean the original command first
+            command = self.command
+            # print('original command: %s' % command)
+            input_file_template = 'ffmpeg -i "{input_file_full_path}"'
+            extra_options_template = ' {extra_options}'
+            output_file_template = ' "{output_file_full_path}"'
+            command = command.replace(input_file_template, '')
+            command = command.replace(extra_options_template, '')
+            command = command.replace(output_file_template, '')
+            # print("kilciksiz command: %s" % command)
+
+            # remove any occurrence of the options from the original command
+            # part the original command to flag and value pairs
+            flags_and_values = command.split(' -')[1:]
+            # print("flags_and_values: %s" % flags_and_values)
+
+            # now we should left with only the commands and value pairs
+            # add the dash '-' sign back in to the flags_and_values
+            flags_and_values = ["-%s" % x for x in flags_and_values]
+            # print("flags_and_values (after adding dash): %s" % flags_and_values)
+            # now for each command try to find the extra option and replace it
+            if not extra_options.startswith(" "):
+                extra_options = " %s" % extra_options
+            extra_options_flags_and_values = extra_options.split(" -")[1:]
+            # restore extra_options
+            extra_options = extra_options.strip()
+
+            # print("extra_options_flags_and_values: %s" % extra_options_flags_and_values)
+            for extra_options_flag_and_value in extra_options_flags_and_values:
+                # print("extra_options_flag_and_value: %s" % extra_options_flag_and_value)
+                flag, value = extra_options_flag_and_value.split(" ")
+                # print("flag: %s" % flag)
+                # print("value: %s" % value)
+                if not flag:
+                    # this should be the first one skip it
+                    # print("no flag! skipping")
+                    continue
+
+                # add the dash sign back
+                flag = '-%s' % flag
+                # now try to find the flag in flags_and_values
+
+                new_flags_and_values = []
+                for f in flags_and_values:
+                    if flag in f:
+                        # print("overriding %s in the original command" % f)
+                        pass
+                    else:
+                        new_flags_and_values.append(f)
+                flags_and_values = new_flags_and_values
+
+            # now we should have filtered the original flags and values
+            # recompile them to a proper command
+            self.command = '%s %s%s%s' % (
+                input_file_template,
+                ' '.join(flags_and_values),
+                extra_options_template,
+                output_file_template
+            )
+            # print('self.command: %s' % self.command)
+
+        self._extra_options = extra_options
 
     def run_per_file(self, f):
         """converts only one file
