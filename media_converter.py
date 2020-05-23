@@ -37,31 +37,35 @@ class Manager(object):
             'name': '30_to_24',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" -crf 14 '
-                       '-r 24 {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 14 -r 24 '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
             'name': 'extract_audio',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.wav',
-            'command': 'ffmpeg -i "{input_file_full_path}" {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
             'name': 'fix_screen_capture',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" -crf 15 '
-                       '-an {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 28 -flags:v "+cgop" -g 300 -an '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
             'name': 'mp4_to_mov',
             'file_types': ['.mp4'],
             'output_file_extension': '.mov',
-            'command': 'ffmpeg -i "{input_file_full_path}" -crf 15 '
-                       '-an {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -an '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
@@ -69,24 +73,26 @@ class Manager(object):
             'file_types': ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp'],
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k '
-                       '-an {extra_options} '
+                       '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k -an '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
             'name': 'mov_to_mp4',
             'file_types': ['.mov'],
             'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" -crf 15 '
-                       '-an {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -an '
+                       '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
             'name': 'audio_to_aac',
             'file_types': ['.wav', '.mp3', '.m4a'],
             'output_file_extension': '.m4a',
-            'command': 'ffmpeg -i "{input_file_full_path}" -c:a aac '
-                       '-b:a 192k {extra_options} '
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:a aac -b:a 192k '
+                       '{extra_options} '
                        '"{output_file_full_path}"'
         },
         {
@@ -441,18 +447,26 @@ class MediaConverter(object):
         source_file_basename, source_file_extension = os.path.splitext(
             os.path.basename(f)
         )
+
+        # remove any %03d or %04d from the source_file_basename
+        import re
+        source_file_basename = re.sub("\.%[0-9]+d", "", source_file_basename)
         source_file_extension = source_file_extension.lower()
+        op.info("source_file_basename: %s" % source_file_basename)
+        op.info("source_file_extension: %s" % source_file_extension)
 
         output_file_name = '%s%s' % (
             source_file_basename,
             self.output_file_extension
         )
+        op.info("output_file_name: %s" % output_file_name)
 
         output_file_full_path = os.path.join(
             self.target_path,
             output_file_name
         )
 
+        op.info('self.target_path: %s' % self.target_path)
         op.info('output_file_full_path: %s' % output_file_full_path)
 
         # do not run the command if:
@@ -510,17 +524,8 @@ class MediaConverter(object):
         """runs the command
         """
         source_path = self.source_path
-        if "*" in self.source_path:
+        if "%" in self.source_path:
             # this is an image sequence
-            # replace the %03d or %04d part with the start_number
-            # option
-            # which should exist
-            start_number = self.extra_options.split(" ")[1]
-            print("start_number: %s" % start_number)
-            source_path = source_path.replace("*", start_number)
-            print("source_path: %s" % source_path)
-
-            # elif os.path.isfile(source_path):
             self.run_per_file(self.source_path)
         else:
             if os.path.isdir(source_path):
@@ -583,8 +588,9 @@ def main():
         sys.exit(0)
 
     if target_path is None:
-        if source_path and os.path.isfile(source_path):
-            target_path = os.path.dirname(source_path)
+        if source_path:
+            if "%" in source_path or os.path.isfile(source_path):
+                target_path = os.path.dirname(source_path)
         else:
             target_path = source_path
 
