@@ -55,7 +55,16 @@ class Manager(object):
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 28 -flags:v "+cgop" -g 300 -an '
+                       '-crf 28 -flags:v "+cgop" -g 300 -acodec copy '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'fix_screen_capture2',
+            'file_types': ['.mov', '.mp4', '.mkv'],
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -acodec copy '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -64,7 +73,7 @@ class Manager(object):
             'file_types': ['.mp4'],
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 15 -an '
+                       '-crf 15 -acodec copy '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -82,7 +91,7 @@ class Manager(object):
             'file_types': ['.mov'],
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 15 -an '
+                       '-crf 15 -acodec copy '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -92,6 +101,15 @@ class Manager(object):
             'output_file_extension': '.m4a',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:a aac -b:a 192k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'audio_to_wav',
+            'file_types': ['.wav', '.mp3', '.m4a'],
+            'output_file_extension': '.wav',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       # '-c:a aac -b:a 192k '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
@@ -538,8 +556,11 @@ class MediaConverter(object):
 def main():
     """The main function
     """
-    from colorama import init
-    init()
+    try:
+        from colorama import init
+        init()
+    except ImportError:
+        pass
 
     # create a manager
     manager = Manager()
