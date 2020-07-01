@@ -96,6 +96,15 @@ class Manager(object):
                        '"{output_file_full_path}"'
         },
         {
+            'name': 'audio_to_wav',
+            'file_types': ['.wav', '.mp3', '.m4a'],
+            'output_file_extension': '.wav',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       # '-c:a aac -b:a 192k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
             'name': 'prores_to_h264_simple',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.mp4',
