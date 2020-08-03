@@ -295,6 +295,21 @@ class Manager(object):
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
+        {
+            'name': 'vertical_video_to_letterbox',
+            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
+                       # '-s 1280x720 '
+                       # '-vf "scale=1280:-2" '
+                       "-vf 'split[original][copy];[copy]scale=ih*16/9:-1,crop=h=iw*9/16,gblur=sigma=20[blurred];[blurred][original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2' "
+                       '-profile:v high -coder ac '
+                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-r:a 48000 -movflags faststart '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
 
         #
         # denoise with hqdn3d
