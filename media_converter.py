@@ -43,6 +43,15 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
+            'name': 'gif_to_png',
+            'file_types': ['.gif'],
+            'output_file_extension': '.png',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-vsync 0 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
             'name': 'extract_audio',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.wav',
@@ -361,6 +370,9 @@ class Manager(object):
 class MediaConverter(object):
     """Converts between different media types
     """
+    image_formats = [
+        '.png', '.jpg', '.jpeg'
+    ]
 
     def __init__(self, **kwargs):
 
@@ -488,10 +500,17 @@ class MediaConverter(object):
         op.info("source_file_basename: %s" % source_file_basename)
         op.info("source_file_extension: %s" % source_file_extension)
 
-        output_file_name = '%s%s' % (
-            source_file_basename,
-            self.output_file_extension
-        )
+        if self.output_file_extension in self.image_formats:
+            output_file_name = '%s.%s%s' % (
+                source_file_basename,
+                '%03d',
+                self.output_file_extension
+            )
+        else:
+            output_file_name = '%s%s' % (
+                source_file_basename,
+                self.output_file_extension
+            )
         op.info("output_file_name: %s" % output_file_name)
 
         output_file_full_path = os.path.join(
