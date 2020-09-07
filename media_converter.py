@@ -60,6 +60,22 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
+            'name': 'extract_alpha',
+            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'output_file_extension': '.mov',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-pix_fmt yuv422p9le '
+                       '-preset veryslow '
+                       '-vf alphaextract,format=yuv420p '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
             'name': 'fix_screen_capture',
             'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
             'output_file_extension': '.mp4',
@@ -74,6 +90,15 @@ class Manager(object):
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 15 -acodec copy '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'fix_screen_capture2_mp3_audio',
+            'file_types': ['.mov', '.mp4', '.mkv'],
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -acodec libmp3lame -ab 96k'
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -119,6 +144,15 @@ class Manager(object):
             'output_file_extension': '.wav',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        # '-c:a aac -b:a 192k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'audio_to_mp3',
+            'file_types': ['.wav', '.mp3', '.m4a'],
+            'output_file_extension': '.mp3',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-acodec libmp3lame -b:a 192k '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
@@ -297,7 +331,7 @@ class Manager(object):
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
                        # '-s 1280x720 '
-                       '-vf "scale=1280:-2" '
+                       # '-vf "scale=1280:-2" '
                        '-profile:v high -coder ac '
                        '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
