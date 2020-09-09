@@ -546,13 +546,13 @@ class MediaConverter(object):
                 self.output_file_extension
             )
         op.info("output_file_name: %s" % output_file_name)
+        op.info('self.target_path: %s' % self.target_path)
 
         output_file_full_path = os.path.join(
             self.target_path,
             output_file_name
         )
 
-        op.info('self.target_path: %s' % self.target_path)
         op.info('output_file_full_path: %s' % output_file_full_path)
 
         # do not run the command if:
@@ -680,8 +680,8 @@ def main():
         if source_path:
             if "%" in source_path or os.path.isfile(source_path):
                 target_path = os.path.dirname(source_path)
-        else:
-            target_path = source_path
+            else:
+                target_path = source_path
 
     # find the converter
     converter = manager.get_converter(converter_name)
