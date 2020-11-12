@@ -4,6 +4,10 @@
 import os
 import sys
 
+AUDIO_FORMATS = ['.wav', '.mp3', '.m4a']
+VIDEO_FORMATS = ['.mov', '.mp4', '.webm', '.mkv', '.m4v']
+IMAGE_FORMATS = ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp']
+
 
 class OutputPrinter(object):
     HEADER = '\033[95m'
@@ -35,7 +39,7 @@ class Manager(object):
     converter_data = [
         {
             'name': '30_to_24',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 14 -r 24 '
@@ -53,7 +57,7 @@ class Manager(object):
         },
         {
             'name': 'extract_audio',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS,
             'output_file_extension': '.wav',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '{extra_options} '
@@ -61,7 +65,7 @@ class Manager(object):
         },
         {
             'name': 'extract_alpha',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-probesize 5000000 '
@@ -77,7 +81,7 @@ class Manager(object):
         },
         {
             'name': 'fix_screen_capture',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 28 -flags:v "+cgop" -g 300 -acodec copy '
@@ -86,7 +90,7 @@ class Manager(object):
         },
         {
             'name': 'fix_screen_capture2',
-            'file_types': ['.mov', '.mp4', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 15 -acodec copy '
@@ -95,7 +99,7 @@ class Manager(object):
         },
         {
             'name': 'fix_screen_capture2_mp3_audio',
-            'file_types': ['.mov', '.mp4', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 15 -acodec libmp3lame -ab 96k'
@@ -113,10 +117,19 @@ class Manager(object):
         },
         {
             'name': 'image_seq_to_mp4',
-            'file_types': ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp'],
+            'file_types': IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k -an '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'video_to_jpg',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.jpg',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-qscale:v 2 '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -140,7 +153,7 @@ class Manager(object):
         },
         {
             'name': 'audio_to_wav',
-            'file_types': ['.wav', '.mp3', '.m4a'],
+            'file_types': AUDIO_FORMATS,
             'output_file_extension': '.wav',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        # '-c:a aac -b:a 192k '
@@ -149,7 +162,7 @@ class Manager(object):
         },
         {
             'name': 'audio_to_mp3',
-            'file_types': ['.wav', '.mp3', '.m4a'],
+            'file_types': AUDIO_FORMATS,
             'output_file_extension': '.mp3',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-acodec libmp3lame -b:a 192k '
@@ -158,7 +171,7 @@ class Manager(object):
         },
         {
             'name': 'prores_to_h264_simple',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -b:v 30000k -c:a aac -b:a 192k '
@@ -167,7 +180,7 @@ class Manager(object):
         },
         {
             'name': 'youtube',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 21 -bf 2 -flags:v "+cgop" -g 12 '
@@ -179,7 +192,7 @@ class Manager(object):
         },
         {
             'name': 'youtube4K',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
@@ -192,7 +205,7 @@ class Manager(object):
         },
         {
             'name': 'youtube2',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
@@ -206,7 +219,7 @@ class Manager(object):
         },
         {
             'name': 'prores_to_h264_422_100',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-pix_fmt "yuv422p" '
@@ -220,7 +233,7 @@ class Manager(object):
         },
         {
             'name': 'prores_to_h264_420_100',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-pix_fmt "yuv420p" '
@@ -234,7 +247,7 @@ class Manager(object):
         },
         {
             'name': 'prores422lt_proxy',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-probesize 5000000 '
@@ -250,7 +263,7 @@ class Manager(object):
         },
         {
             'name': 'prores422lt',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-probesize 5000000 '
@@ -266,7 +279,7 @@ class Manager(object):
         },
         {
             'name': 'prores422sq',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-probesize 5000000 '
@@ -281,7 +294,7 @@ class Manager(object):
         },
         {
             'name': 'prores422hq',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-probesize 5000000 '
@@ -296,7 +309,7 @@ class Manager(object):
         },
         {
             'name': 'vr',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-s 1920x1080 '
@@ -306,7 +319,7 @@ class Manager(object):
         },
         {
             'name': 'vr1080',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-s 1920x1080 '
@@ -316,7 +329,7 @@ class Manager(object):
         },
         {
             'name': 'vr1440',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-s 2560x1440 '
@@ -326,7 +339,7 @@ class Manager(object):
         },
         {
             'name': 'whatsapp',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
@@ -339,8 +352,33 @@ class Manager(object):
                        '"{output_file_full_path}"'
         },
         {
+            'name': 'whatsapp_720p',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
+                       # '-s 1280x720 '
+                       '-vf "scale=1280:-2" '
+                       '-profile:v high -coder ac '
+                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-r:a 48000 -movflags faststart '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'segment',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-f segment -segment_time 00:01:00 '
+                       '-acodec copy -vcodec copy -async 1 '
+                       '-reset_timestamps 1 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
             'name': 'vertical_video_to_letterbox',
-            'file_types': ['.mov', '.mp4', '.webm', '.mkv'],
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
@@ -404,9 +442,6 @@ class Manager(object):
 class MediaConverter(object):
     """Converts between different media types
     """
-    image_formats = [
-        '.png', '.jpg', '.jpeg'
-    ]
 
     def __init__(self, **kwargs):
 
@@ -450,10 +485,11 @@ class MediaConverter(object):
         :return:
         """
         if extra_options is not None:
-
             # clean the original command first
             command = self.command
-            # print('original command: %s' % command)
+            # ffmpeg could not be the only command we use here
+            # so assuming the command starts with this
+            # it is not good
             input_file_template = 'ffmpeg -i "{input_file_full_path}"'
             extra_options_template = ' {extra_options}'
             output_file_template = ' "{output_file_full_path}"'
@@ -514,6 +550,23 @@ class MediaConverter(object):
 
         self._extra_options = extra_options
 
+    @classmethod
+    def get_start_number_from_path(cls, path):
+        """returns the start number from the given pattern. None if it is not
+        applicable.
+
+        :param path:
+        :return:
+        """
+        import re
+        # generate the -start_frame option as an extra option
+        glob_pattern = re.sub("\.%[0-9]+d", "*", path)
+
+        import glob
+        all_files = sorted(glob.glob(glob_pattern))
+        if all_files:
+            return all_files[0].split(".")[-2]
+
     def run_per_file(self, f):
         """converts only one file
         """
@@ -527,17 +580,28 @@ class MediaConverter(object):
             os.path.basename(f)
         )
 
-        # remove any %03d or %04d from the source_file_basename
+        # if this is an image sequence try to find the start_number
         import re
+        is_image_sequence = re.match(".*\.%[0-9]+d.*", source_file_basename) is not None
+        if is_image_sequence:
+            start_number = self.get_start_number_from_path(source_file_full_path)
+            # # do not add start_number option if it is already available
+            # if "start_number" not in self.extra_options:
+            #     self.extra_options = "%s -start_number %s" % (self.extra_options, start_number)
+            # add the start_number to the beginning of the command
+            # self.command =
+            self.command = self.command.replace('ffmpeg', 'ffmpeg -start_number %s' % start_number)
+
+        # remove any %03d or %04d from the source_file_basename
         source_file_basename = re.sub("\.%[0-9]+d", "", source_file_basename)
         source_file_extension = source_file_extension.lower()
         op.info("source_file_basename: %s" % source_file_basename)
         op.info("source_file_extension: %s" % source_file_extension)
 
-        if self.output_file_extension in self.image_formats:
+        if self.output_file_extension in IMAGE_FORMATS:
             output_file_name = '%s.%s%s' % (
                 source_file_basename,
-                '%03d',
+                '%04d',
                 self.output_file_extension
             )
         else:
