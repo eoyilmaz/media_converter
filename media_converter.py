@@ -5,7 +5,7 @@ import os
 import sys
 
 AUDIO_FORMATS = ['.wav', '.mp3', '.m4a']
-VIDEO_FORMATS = ['.mov', '.mp4', '.webm', '.mkv', '.m4v']
+VIDEO_FORMATS = ['.mov', '.mp4', '.webm', '.mkv', '.m4v', '.mxf']
 IMAGE_FORMATS = ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp']
 
 
