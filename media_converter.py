@@ -73,7 +73,7 @@ class Manager(object):
                        '-profile:v 3 '
                        '-q:v 5 '
                        '-vendor ap10 '
-                       '-pix_fmt yuv422p9le '
+                       '-vf format=yuv422p9le '
                        '-preset veryslow '
                        '-vf alphaextract,format=yuv420p '
                        '{extra_options} '
@@ -120,7 +120,9 @@ class Manager(object):
             'file_types': IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k -an '
+                       '-vcodec libx264 '
+                       '-vf format=yuv420p '
+                       '-g 1 -b:v 20480k -an '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -185,7 +187,8 @@ class Manager(object):
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 21 -bf 2 -flags:v "+cgop" -g 12 '
                        '-profile:v high -coder ac '
-                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf format=yuv420p '
+                       '-c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -197,7 +200,7 @@ class Manager(object):
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
                        '-profile:v high -coder ac '
-                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '-s 3840x2160 '
                        '{extra_options} '
@@ -211,7 +214,7 @@ class Manager(object):
                        '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
                        '-preset slow '
                        '-profile:v high -coder 1 '
-                       '-pix_fmt yuv420p -c:a aac -bf 2 -b:a 192k '
+                       '-vf format=yuv420p -c:a aac -bf 2 -b:a 192k '
                        '-profile:a aac_low '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
@@ -222,7 +225,7 @@ class Manager(object):
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-pix_fmt "yuv422p" '
+                       '-vf format="yuv422p" '
                        '-c:v libx264 '
                        '-preset medium '
                        '-b:v 100M '
@@ -236,7 +239,7 @@ class Manager(object):
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-pix_fmt "yuv420p" '
+                       '-vf format="yuv420p" '
                        '-c:v libx264 '
                        '-preset medium '
                        '-b:v 100M '
@@ -256,7 +259,7 @@ class Manager(object):
                        '-profile:v 1 '
                        '-q:v 20 '
                        '-vendor ap10 '
-                       '-pix_fmt yuv422p9le '
+                       '-vf format=yuv422p9le '
                        '-preset veryslow '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -271,7 +274,7 @@ class Manager(object):
                        '-profile:v 1 '
                        '-q:v 11 '
                        '-vendor ap10 '
-                       '-pix_fmt yuv422p9le '
+                       '-vf format=yuv422p9le '
                        # '-preset veryslow '
                        '-threads 16 '
                        '{extra_options} '
@@ -287,7 +290,7 @@ class Manager(object):
                        '-profile:v 2 '
                        '-q:v 5 '
                        '-vendor ap10 '
-                       '-pix_fmt yuv422p9le '
+                       '-vf format=yuv422p9le '
                        '-preset veryslow '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -302,7 +305,7 @@ class Manager(object):
                        '-profile:v 3 '
                        '-q:v 5 '
                        '-vendor ap10 '
-                       '-pix_fmt yuv422p9le '
+                       '-vf format=yuv422p9le '
                        '-preset veryslow '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -346,7 +349,7 @@ class Manager(object):
                        # '-s 1280x720 '
                        # '-vf "scale=1280:-2" '
                        '-profile:v high -coder ac '
-                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -360,7 +363,7 @@ class Manager(object):
                        # '-s 1280x720 '
                        '-vf "scale=1280:-2" '
                        '-profile:v high -coder ac '
-                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -386,11 +389,27 @@ class Manager(object):
                        # '-vf "scale=1280:-2" '
                        "-vf 'split[original][copy];[copy]scale=ih*16/9:-1,crop=h=iw*9/16,gblur=sigma=20[blurred];[blurred][original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2' "
                        '-profile:v high -coder ac '
-                       '-pix_fmt yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
+        {
+            'name': 'denoise_normal',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf format=yuv422p9le '
+                       '-preset veryslow '
+                       '-filter:v hqdn3d=10:20:10:20 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        }
 
         #
         # denoise with hqdn3d
