@@ -22,7 +22,7 @@ def test_extra_options_are_not_overriding_template_options():
     converter.extra_options = '-crf 20'
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
-        '-an {extra_options} ' \
+        '-flags:v "+cgop" -g 300 -acodec copy {extra_options} ' \
         '"{output_file_full_path}"'
     assert converter.extra_options == '-crf 20'
 
@@ -37,20 +37,20 @@ def test_extra_options_are_overriding_template_options():
     assert isinstance(converter, MediaConverter)
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
-        '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k ' \
+        '-vcodec libx264 -vf format=yuv420p -g 1 -b:v 20480k ' \
         '-an {extra_options} ' \
         '"{output_file_full_path}"'
     assert converter.extra_options is None
 
     # now setting the extra options with let's say -crf 20 should remove the
     # original flag from the self.command attribute
-    converter.extra_options = '-pix_fmt yuv422p'
+    converter.extra_options = '-vf format=yuv422p'
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
         '-vcodec libx264 -g 1 -b:v 20480k ' \
         '-an {extra_options} ' \
         '"{output_file_full_path}"'
-    assert converter.extra_options == '-pix_fmt yuv422p'
+    assert converter.extra_options == '-vf format=yuv422p'
 
 
 def test_extra_options_are_overriding_multiple_template_options():
@@ -63,20 +63,20 @@ def test_extra_options_are_overriding_multiple_template_options():
     assert isinstance(converter, MediaConverter)
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
-        '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k ' \
+        '-vcodec libx264 -vf format=yuv420p -g 1 -b:v 20480k ' \
         '-an {extra_options} ' \
         '"{output_file_full_path}"'
     assert converter.extra_options is None
 
     # now setting the extra options with let's say -crf 20 should remove the
     # original flag from the self.command attribute
-    converter.extra_options = '-pix_fmt yuv422p -b:v 120480k'
+    converter.extra_options = '-vf format=yuv422p -b:v 120480k'
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
         '-vcodec libx264 -g 1 ' \
         '-an {extra_options} ' \
         '"{output_file_full_path}"'
-    assert converter.extra_options == '-pix_fmt yuv422p -b:v 120480k'
+    assert converter.extra_options == '-vf format=yuv422p -b:v 120480k'
 
 
 def test_start_number_is_generated_correctly():
@@ -89,6 +89,6 @@ def test_start_number_is_generated_correctly():
     assert isinstance(converter, MediaConverter)
 
     assert converter.command == 'ffmpeg -i "{input_file_full_path}" ' \
-        '-vcodec libx264 -pix_fmt yuv420p -g 1 -b:v 20480k ' \
+        '-vcodec libx264 -vf format=yuv420p -g 1 -b:v 20480k ' \
         '-an {extra_options} ' \
         '"{output_file_full_path}"'
