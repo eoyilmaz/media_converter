@@ -4,9 +4,13 @@
 import os
 import sys
 
+
+__version__ = "1.0.0"
+
+
 AUDIO_FORMATS = ['.wav', '.mp3', '.m4a']
 VIDEO_FORMATS = ['.mov', '.mp4', '.webm', '.mkv', '.m4v', '.mxf']
-IMAGE_FORMATS = ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp']
+IMAGE_FORMATS = ['.jpg', '.jpeg', '.png', '.tga', '.tiff', '.tif', '.bmp', '.exr']
 
 
 class OutputPrinter(object):
@@ -515,17 +519,14 @@ class MediaConverter(object):
             command = command.replace(input_file_template, '')
             command = command.replace(extra_options_template, '')
             command = command.replace(output_file_template, '')
-            # print("kilciksiz command: %s" % command)
 
             # remove any occurrence of the options from the original command
             # part the original command to flag and value pairs
             flags_and_values = command.split(' -')[1:]
-            # print("flags_and_values: %s" % flags_and_values)
 
             # now we should left with only the commands and value pairs
             # add the dash '-' sign back in to the flags_and_values
             flags_and_values = ["-%s" % x for x in flags_and_values]
-            # print("flags_and_values (after adding dash): %s" % flags_and_values)
             # now for each command try to find the extra option and replace it
             if not extra_options.startswith(" "):
                 extra_options = " %s" % extra_options
@@ -533,15 +534,10 @@ class MediaConverter(object):
             # restore extra_options
             extra_options = extra_options.strip()
 
-            # print("extra_options_flags_and_values: %s" % extra_options_flags_and_values)
             for extra_options_flag_and_value in extra_options_flags_and_values:
-                # print("extra_options_flag_and_value: %s" % extra_options_flag_and_value)
                 flag, value = extra_options_flag_and_value.split(" ")
-                # print("flag: %s" % flag)
-                # print("value: %s" % value)
                 if not flag:
                     # this should be the first one skip it
-                    # print("no flag! skipping")
                     continue
 
                 # add the dash sign back
@@ -550,10 +546,7 @@ class MediaConverter(object):
 
                 new_flags_and_values = []
                 for f in flags_and_values:
-                    if flag in f:
-                        # print("overriding %s in the original command" % f)
-                        pass
-                    else:
+                    if flag not in f:
                         new_flags_and_values.append(f)
                 flags_and_values = new_flags_and_values
 
@@ -565,7 +558,6 @@ class MediaConverter(object):
                 extra_options_template,
                 output_file_template
             )
-            # print('self.command: %s' % self.command)
 
         self._extra_options = extra_options
 
@@ -698,8 +690,31 @@ class MediaConverter(object):
             self.run_per_file(self.source_path)
         else:
             if os.path.isdir(source_path):
-                for f in os.listdir(self.source_path):
-                    self.run_per_file(os.path.join(self.source_path, f))
+                # there could be image sequences in this folder.
+                # so we need to supply a compressed list of files in that situation.
+                try:
+                    # use pyseq
+                    import pyseq
+                    sequences = pyseq.get_sequences(self.source_path)
+                    for sequence in sequences:
+                        # only run for sequences if it is one of IMAGE_FORMATS
+                        extension = os.path.splitext(sequence.path())[-1]
+                        if extension in IMAGE_FORMATS:
+                            # This is an image sequence run for this whole sequence at once
+                            f = sequence.format("%h%p%t")
+                            self.run_per_file(os.path.join(self.source_path, f))
+                        elif extension in VIDEO_FORMATS:
+                            # Oops this is individual videos crammed together
+                            # run per item
+                            for item in sequence:
+                                f = item.path
+                                self.run_per_file(os.path.join(self.source_path, f))
+                except ImportError:
+                    # pyseq is not available
+                    # just run the normal version
+                    for f in os.listdir(self.source_path):
+                        self.run_per_file(os.path.join(self.source_path, f))
+
             elif os.path.isfile(source_path):
                 self.run_per_file(self.source_path)
 
