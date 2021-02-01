@@ -778,7 +778,7 @@ def main():
         description='Batch convert media by using templates'
     )
     parser.add_argument(
-        '-t', '--template', required=True,
+        '-t', '--template', required=False,
         help='The template to use. One of: ' '%s' % ", ".join(converter_names)
     )
     parser.add_argument(
@@ -803,6 +803,13 @@ def main():
         action='store_true'
     )
 
+    parser.add_argument(
+        '-v', '--version',
+        help='Print version info',
+        action='store_true',
+        required=False,
+    )
+
     args = parser.parse_args()
 
     converter_name = args.template
@@ -810,10 +817,20 @@ def main():
     target_path = args.output
     auto_rename = args.auto_rename
     command_info = args.command_info
+    version_info_query = args.version
 
     if converter_name == 'get_converters':
         print(" ".join(converter_names))
         sys.exit(0)
+
+    if version_info_query:
+        print("media_converter %s" % __version__)
+        sys.exit(0)
+
+    if not converter_name:
+        parser.print_usage()
+        print("media_converter: error: the following arguments are required: -t/--template")
+        sys.exit(-1)
 
     if target_path is None:
         if source_path:
