@@ -140,6 +140,15 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
+            'name': 'video_to_png',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.png',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-qscale:v 2 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
             'name': 'mov_to_mp4',
             'file_types': ['.mov'],
             'output_file_extension': '.mp4',
@@ -408,16 +417,48 @@ class Manager(object):
                        '-profile:v 3 '
                        '-q:v 5 '
                        '-vendor ap10 '
-                       '-vf format=yuv422p9le '
+                       '-vf hqdn3d=10:20:10:20,format=yuv422p9le '
                        '-preset veryslow '
-                       '-filter:v hqdn3d=10:20:10:20 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': '30_to_24_decimate_frames',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf "mpdecimate=hi=250:lo=250:frac=1,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
+                       # '-vf format=yuv422p9le '
+                       '-preset veryslow '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': '30_to_24_motion_detection',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf "select=\'if(gt(scene,0.005),st(1,t),ld(1))\',setpts=N/FRAME_RATE/TB,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
+                       # '-vf format=yuv422p9le '
+                       '-preset veryslow '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         }
 
+
         #
         # denoise with hqdn3d
-        # -filter:v hqdn3d=4:3:6:2
+        # -vf hqdn3d=4:3:6:2
         #                  | | | |
         #                  | | | +-> ct : Chroma Temporal Strength.
         #                  | |            Defaults to: lt * cs / ls
@@ -429,10 +470,10 @@ class Manager(object):
         #                                 Defaults to: 4.0
         #
         # For extreme chroma noise reduction I've used:
-        # -filter:v hqdn3d=4:40:6:60
+        # -vf hqdn3d=4:40:6:60
         #
         # This has resulted trails in chroma channel. So I've reduced to
-        # -filter:v hqdn3d=4:40:6:6
+        # -vf hqdn3d=4:40:6:6
         #
         # https://ffmpeg.org/ffmpeg-filters.html#toc-hqdn3d-1
     ]
