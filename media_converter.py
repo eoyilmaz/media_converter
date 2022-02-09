@@ -51,6 +51,19 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
+            'name': 'video_to_gif',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.gif',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-vf '
+                       '"fps=10,scale=960:-1:flags=lanczos,'
+                       'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
+                       '-loop 0 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+
+        },
+        {
             'name': 'gif_to_png',
             'file_types': ['.gif'],
             'output_file_extension': '.png',
