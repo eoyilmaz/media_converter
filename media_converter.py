@@ -97,7 +97,7 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'fix_screen_capture',
+            'name': 'screen_capture',
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
@@ -106,7 +106,7 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'fix_screen_capture2',
+            'name': 'screen_capture2',
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
@@ -115,11 +115,20 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'fix_screen_capture2_mp3_audio',
+            'name': 'screen_capture2_mp3_audio',
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 15 -acodec libmp3lame -ab 96k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+             'name': 'screen_capture3',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 40 -acodec libmp3lame -ab 96k '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
