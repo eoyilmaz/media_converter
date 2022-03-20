@@ -51,34 +51,78 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'video_to_gif',
-            'file_types': VIDEO_FORMATS,
-            'output_file_extension': '.gif',
+            'name': '30_to_24_decimate_frames',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-vf '
-                       '"fps=10,scale=960:-1:flags=lanczos,'
-                       'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
-                       '-loop 0 '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf "mpdecimate=hi=250:lo=250:frac=1,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
+            # '-vf format=yuv422p9le '
+                       '-preset veryslow '
                        '{extra_options} '
-                       '"{output_file_full_path}"',
-
+                       '"{output_file_full_path}"'
         },
         {
-            'name': 'gif_to_png',
-            'file_types': ['.gif'],
-            'output_file_extension': '.png',
+            'name': '30_to_24_motion_detection',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-vsync 0 '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf "select=\'if(gt(scene,0.005),st(1,t),ld(1))\',setpts=N/FRAME_RATE/TB,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
+            # '-vf format=yuv422p9le '
+                       '-preset veryslow '
                        '{extra_options} '
-                       '"{output_file_full_path}"',
+                       '"{output_file_full_path}"'
         },
         {
-            'name': 'extract_audio',
-            'file_types': VIDEO_FORMATS,
+            'name': 'audio_to_aac',
+            'file_types': ['.wav', '.mp3', '.m4a'],
+            'output_file_extension': '.m4a',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:a aac -b:a 192k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'audio_to_mp3',
+            'file_types': AUDIO_FORMATS,
+            'output_file_extension': '.mp3',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-acodec libmp3lame -b:a 192k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'audio_to_wav',
+            'file_types': AUDIO_FORMATS,
             'output_file_extension': '.wav',
             'command': 'ffmpeg -i "{input_file_full_path}" '
+            # '-c:a aac -b:a 192k '
                        '{extra_options} '
-                       '"{output_file_full_path}"',
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'denoise_normal',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mov',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-probesize 5000000 '
+                       '-c:v prores_ks '
+                       '-profile:v 3 '
+                       '-q:v 5 '
+                       '-vendor ap10 '
+                       '-vf hqdn3d=10:20:10:20,format=yuv422p9le '
+                       '-preset veryslow '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
         },
         {
             'name': 'extract_alpha',
@@ -97,47 +141,39 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'screen_capture',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
+            'name': 'extract_audio',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.wav',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 28 -flags:v "+cgop" -g 300 -acodec copy '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'screen_capture2',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
+            'name': 'gif_to_png',
+            'file_types': ['.gif'],
+            'output_file_extension': '.png',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 15 -acodec copy '
+                       '-vsync 0 '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'screen_capture2_mp3_audio',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
+            'name': 'image_seq_to_gif_loop',
+            'file_types': IMAGE_FORMATS,
+            'output_file_extension': '.gif',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 15 -acodec libmp3lame -ab 96k '
+                       '-filter_complex '
+                       '"split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
-             'name': 'screen_capture3',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
+            'name': 'image_seq_to_gif_bounce',
+            'file_types': IMAGE_FORMATS,
+            'output_file_extension': '.gif',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 40 -acodec libmp3lame -ab 96k '
-                       '{extra_options} '
-                       '"{output_file_full_path}"',
-        },
-        {
-            'name': 'mp4_to_mov',
-            'file_types': ['.mp4'],
-            'output_file_extension': '.mov',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-crf 15 -acodec copy '
+                       '-filter_complex '
+                       '"[0]reverse[r];[0][r]concat=n=2:v=1:a=0,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
@@ -153,24 +189,6 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'video_to_jpg',
-            'file_types': VIDEO_FORMATS,
-            'output_file_extension': '.jpg',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-qscale:v 2 '
-                       '{extra_options} '
-                       '"{output_file_full_path}"',
-        },
-        {
-            'name': 'video_to_png',
-            'file_types': VIDEO_FORMATS,
-            'output_file_extension': '.png',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-qscale:v 2 '
-                       '{extra_options} '
-                       '"{output_file_full_path}"',
-        },
-        {
             'name': 'mov_to_mp4',
             'file_types': ['.mov'],
             'output_file_extension': '.mp4',
@@ -180,80 +198,13 @@ class Manager(object):
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'audio_to_aac',
-            'file_types': ['.wav', '.mp3', '.m4a'],
-            'output_file_extension': '.m4a',
+            'name': 'mp4_to_mov',
+            'file_types': ['.mp4'],
+            'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:a aac -b:a 192k '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'audio_to_wav',
-            'file_types': AUDIO_FORMATS,
-            'output_file_extension': '.wav',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       # '-c:a aac -b:a 192k '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'audio_to_mp3',
-            'file_types': AUDIO_FORMATS,
-            'output_file_extension': '.mp3',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-acodec libmp3lame -b:a 192k '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'prores_to_h264_simple',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:v libx264 -b:v 30000k -c:a aac -b:a 192k '
+                       '-crf 15 -acodec copy '
                        '{extra_options} '
                        '"{output_file_full_path}"',
-        },
-        {
-            'name': 'youtube',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:v libx264 -crf 21 -bf 2 -flags:v "+cgop" -g 12 '
-                       '-profile:v high -coder ac '
-                       '-vf format=yuv420p '
-                       '-c:a aac -strict 2 -b:a 192k '
-                       '-r:a 48000 -movflags faststart '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'youtube4K',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
-                       '-profile:v high -coder ac '
-                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
-                       '-r:a 48000 -movflags faststart '
-                       '-s 3840x2160 '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'youtube2',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
-                       '-preset slow '
-                       '-profile:v high -coder 1 '
-                       '-vf format=yuv420p -c:a aac -bf 2 -b:a 192k '
-                       '-profile:a aac_low '
-                       '-r:a 48000 -movflags faststart '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
         },
         {
             'name': 'prores_to_h264_422_100',
@@ -269,19 +220,15 @@ class Manager(object):
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
+
         {
-            'name': 'prores_to_h264_420_100',
+            'name': 'prores_to_h264_simple',
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-vf format="yuv420p" '
-                       '-c:v libx264 '
-                       '-preset medium '
-                       '-b:v 100M '
-                       '-c:a aac '
-                       '-b:a 192K '
+                       '-c:v libx264 -b:v 30000k -c:a aac -b:a 192k '
                        '{extra_options} '
-                       '"{output_file_full_path}"'
+                       '"{output_file_full_path}"',
         },
         {
             'name': 'prores422lt_proxy',
@@ -310,7 +257,7 @@ class Manager(object):
                        '-q:v 11 '
                        '-vendor ap10 '
                        '-vf format=yuv422p9le '
-                       # '-preset veryslow '
+            # '-preset veryslow '
                        '-threads 16 '
                        '{extra_options} '
                        '"{output_file_full_path}"'
@@ -346,6 +293,99 @@ class Manager(object):
                        '"{output_file_full_path}"'
         },
         {
+            'name': 'screen_capture',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 28 -flags:v "+cgop" -g 300 -acodec copy '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'screen_capture2',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -acodec copy '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'screen_capture2_mp3_audio',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 15 -acodec libmp3lame -ab 96k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'screen_capture3',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-crf 40 -acodec libmp3lame -ab 96k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'segment',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-f segment -segment_time 00:01:00 '
+                       '-acodec copy -vcodec copy -async 1 '
+                       '-reset_timestamps 1 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'vertical_video_to_letterbox',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
+            # '-s 1280x720 '
+            # '-vf "scale=1280:-2" '
+                       "-vf 'split[original][copy];[copy]scale=ih*16/9:-1,crop=h=iw*9/16,gblur=sigma=20[blurred];[blurred][original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2' "
+                       '-profile:v high -coder ac '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-r:a 48000 -movflags faststart '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'video_to_gif',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.gif',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-vf '
+                       '"fps=10,scale=960:-1:flags=lanczos,'
+                       'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
+                       '-loop 0 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+
+        },
+        {
+            'name': 'video_to_jpg',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.jpg',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-qscale:v 2 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
+            'name': 'video_to_png',
+            'file_types': VIDEO_FORMATS,
+            'output_file_extension': '.png',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-qscale:v 2 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"',
+        },
+        {
             'name': 'vr',
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mp4',
@@ -372,6 +412,60 @@ class Manager(object):
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-s 2560x1440 '
                        '-b:v 6000k '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'youtube',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 21 -bf 2 -flags:v "+cgop" -g 12 '
+                       '-profile:v high -coder ac '
+                       '-vf format=yuv420p '
+                       '-c:a aac -strict 2 -b:a 192k '
+                       '-r:a 48000 -movflags faststart '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'youtube2',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
+                       '-preset slow '
+                       '-profile:v high -coder 1 '
+                       '-vf format=yuv420p -c:a aac -bf 2 -b:a 192k '
+                       '-profile:a aac_low '
+                       '-r:a 48000 -movflags faststart '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'youtube4K',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-c:v libx264 -crf 18 -bf 2 -flags:v "+cgop" -g 12 '
+                       '-profile:v high -coder ac '
+                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-r:a 48000 -movflags faststart '
+                       '-s 3840x2160 '
+                       '{extra_options} '
+                       '"{output_file_full_path}"'
+        },
+        {
+            'name': 'prores_to_h264_420_100',
+            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
+            'output_file_extension': '.mp4',
+            'command': 'ffmpeg -i "{input_file_full_path}" '
+                       '-vf format="yuv420p" '
+                       '-c:v libx264 '
+                       '-preset medium '
+                       '-b:v 100M '
+                       '-c:a aac '
+                       '-b:a 192K '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
@@ -403,79 +497,7 @@ class Manager(object):
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
-        {
-            'name': 'segment',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-f segment -segment_time 00:01:00 '
-                       '-acodec copy -vcodec copy -async 1 '
-                       '-reset_timestamps 1 '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'vertical_video_to_letterbox',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mp4',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
-                       # '-s 1280x720 '
-                       # '-vf "scale=1280:-2" '
-                       "-vf 'split[original][copy];[copy]scale=ih*16/9:-1,crop=h=iw*9/16,gblur=sigma=20[blurred];[blurred][original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2' "
-                       '-profile:v high -coder ac '
-                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
-                       '-r:a 48000 -movflags faststart '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': 'denoise_normal',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mov',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-probesize 5000000 '
-                       '-c:v prores_ks '
-                       '-profile:v 3 '
-                       '-q:v 5 '
-                       '-vendor ap10 '
-                       '-vf hqdn3d=10:20:10:20,format=yuv422p9le '
-                       '-preset veryslow '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': '30_to_24_decimate_frames',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mov',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-probesize 5000000 '
-                       '-c:v prores_ks '
-                       '-profile:v 3 '
-                       '-q:v 5 '
-                       '-vendor ap10 '
-                       '-vf "mpdecimate=hi=250:lo=250:frac=1,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
-                       # '-vf format=yuv422p9le '
-                       '-preset veryslow '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        },
-        {
-            'name': '30_to_24_motion_detection',
-            'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
-            'output_file_extension': '.mov',
-            'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-probesize 5000000 '
-                       '-c:v prores_ks '
-                       '-profile:v 3 '
-                       '-q:v 5 '
-                       '-vendor ap10 '
-                       '-vf "select=\'if(gt(scene,0.005),st(1,t),ld(1))\',setpts=N/FRAME_RATE/TB,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
-                       # '-vf format=yuv422p9le '
-                       '-preset veryslow '
-                       '{extra_options} '
-                       '"{output_file_full_path}"'
-        }
+
 
 
         #
