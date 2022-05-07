@@ -489,10 +489,8 @@ class Manager(object):
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
-                       # '-s 1280x720 '
-                       '-vf "scale=1280:-2" '
                        '-profile:v high -coder ac '
-                       '-vf format=yuv420p -c:a aac -strict 2 -b:a 192k '
+                       '-vf "[in] scale=1280:-2, format=yuv420p[out]" -c:a aac -strict 2 -b:a 192k '
                        '-r:a 48000 -movflags faststart '
                        '{extra_options} '
                        '"{output_file_full_path}"'
