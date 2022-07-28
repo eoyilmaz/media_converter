@@ -55,14 +55,10 @@ class Manager(object):
             'file_types': VIDEO_FORMATS + IMAGE_FORMATS,
             'output_file_extension': '.mov',
             'command': 'ffmpeg -i "{input_file_full_path}" '
-                       '-probesize 5000000 '
-                       '-c:v prores_ks '
-                       '-profile:v 3 '
-                       '-q:v 5 '
-                       '-vendor ap10 '
-                       '-vf "mpdecimate=hi=250:lo=250:frac=1,setpts=N/(24*TB),format=yuv422p9le" -r 24 '
-            # '-vf format=yuv422p9le '
-                       '-preset veryslow '
+                       '-vf '
+                       '"fps=10,'
+                       'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
+                       '-loop 0 '
                        '{extra_options} '
                        '"{output_file_full_path}"'
         },
@@ -360,7 +356,7 @@ class Manager(object):
             'output_file_extension': '.gif',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-vf '
-                       '"fps=10,scale=960:-1:flags=lanczos,'
+                       '"fps=10,'
                        'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" '
                        '-loop 0 '
                        '{extra_options} '
