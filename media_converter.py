@@ -180,13 +180,13 @@ class Manager(object):
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-vcodec libx264 '
                        '-vf format=yuv420p '
-                       '-g 1 -b:v 20480k -an '
+                       '-g 1 -crf 15 -an '
                        '{extra_options} '
                        '"{output_file_full_path}"',
         },
         {
-            'name': 'mov_to_mp4',
-            'file_types': ['.mov'],
+            'name': 'to_mp4',
+            'file_types': IMAGE_FORMATS + VIDEO_FORMATS,
             'output_file_extension': '.mp4',
             'command': 'ffmpeg -i "{input_file_full_path}" '
                        '-crf 15 -acodec copy '
