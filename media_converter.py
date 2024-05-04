@@ -334,13 +334,8 @@ class Manager(object):
             "file_types": VIDEO_FORMATS + IMAGE_FORMATS,
             "output_file_extension": ".mp4",
             "command": 'ffmpeg -i "{input_file_full_path}" '
-            '-c:v libx264 -crf 25 -bf 2 -flags:v "+cgop" -g 12 '
-            # '-s 1280x720 '
-            # '-vf "scale=1280:-2" '
-            "-vf 'split[original][copy];[copy]scale=ih*16/9:-1,crop=h=iw*9/16,gblur=sigma=20[blurred];[blurred][original]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2' "
-            "-profile:v high -coder ac "
-            "-vf format=yuv420p -c:a aac -strict 2 -b:a 192k "
-            "-r:a 48000 -movflags faststart "
+            "-crf 15 -acodec copy "
+            "-lavfi '[0:v]scale=ih*16/9:-1,boxblur=luma_radius=min(h\,w)/20:luma_power=1:chroma_radius=min(cw\,ch)/20:chroma_power=1[bg];[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*9/16' "
             "{extra_options} "
             '"{output_file_full_path}"',
         },
