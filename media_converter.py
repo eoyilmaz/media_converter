@@ -191,8 +191,8 @@ class Manager(object):
             '"{output_file_full_path}"',
         },
         {
-            "name": "mp4_to_mov",
-            "file_types": [".mp4"],
+            "name": "to_mov",
+            "file_types": VIDEO_FORMATS,
             "output_file_extension": ".mov",
             "command": 'ffmpeg -i "{input_file_full_path}" '
             "-crf 15 -acodec copy "
