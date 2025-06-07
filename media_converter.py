@@ -335,7 +335,7 @@ class Manager(object):
             "output_file_extension": ".mp4",
             "command": 'ffmpeg -i "{input_file_full_path}" '
             "-crf 15 -acodec copy "
-            "-lavfi '[0:v]scale=ih*16/9:-1,boxblur=luma_radius=min(h\,w)/20:luma_power=1:chroma_radius=min(cw\,ch)/20:chroma_power=1[bg];[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*9/16' "
+            r"-lavfi '[0:v]scale=ih*16/9:-1,boxblur=luma_radius=min(h\,w)/20:luma_power=1:chroma_radius=min(cw\,ch)/20:chroma_power=1[bg];[bg][0:v]overlay=(W-w)/2:(H-h)/2,crop=h=iw*9/16' "
             "{extra_options} "
             '"{output_file_full_path}"',
         },
@@ -633,7 +633,7 @@ class MediaConverter(object):
         import re
 
         # generate the -start_frame option as an extra option
-        glob_pattern = re.sub("\.%[0-9]+d", "*", path)
+        glob_pattern = re.sub(r"\.%[0-9]+d", "*", path)
 
         import glob
 
@@ -656,7 +656,7 @@ class MediaConverter(object):
         # if this is an image sequence try to find the start_number
         import re
 
-        is_image_sequence = re.match(".*\.%[0-9]+d.*", source_file_basename) is not None
+        is_image_sequence = re.match(r".*\.%[0-9]+d.*", source_file_basename) is not None
         if is_image_sequence:
             start_number = self.get_start_number_from_path(source_file_full_path)
             # # do not add start_number option if it is already available
@@ -669,7 +669,7 @@ class MediaConverter(object):
             )
 
         # remove any %03d or %04d from the source_file_basename
-        source_file_basename = re.sub("\.%[0-9]+d", "", source_file_basename)
+        source_file_basename = re.sub(r"\.%[0-9]+d", "", source_file_basename)
         source_file_extension = source_file_extension.lower()
         op.info("source_file_basename: %s" % source_file_basename)
         op.info("source_file_extension: %s" % source_file_extension)
